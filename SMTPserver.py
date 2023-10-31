@@ -11,7 +11,7 @@ PORT = 2525         # Port to listen on (non-privileged ports are > 1023)
 def process_quit(conn, msg):
     print('submitting message %s', msg)
     send_response(conn, '221')
-    
+
 def process_envelope(conn, msg, cmd, param):
     if cmd == 'MAIL':
         m=re.search('FROM: <(.+)>', param)
