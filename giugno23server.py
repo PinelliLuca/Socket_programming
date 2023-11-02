@@ -1,49 +1,49 @@
 import socket
-import json
+import sys
+import time
 import ipaddress
+import json
 
-def get_min_max_ips(netid, netmaskCIDR):
-    # Calcola l'IP minimo e massimo escludendo indirizzi di rete e broadcast
-    network = ipaddress.IPv4Network(f'{netid}/{netmaskCIDR}', strict=False)
+#funzione che controlla che il formato del CIDR sia valido
+def controllo_ip(data):
+    try:
+        ipaddress.IPv4Network(data, strict=False)
+        return True
+    except ValueError:
+        return False
+
+#funzione che calcola l'ip minimo e massimo tranne l'indirizzo di broadaast e di rete
+def MinMaxIp(netid, netmask):
+    network = ipaddress.IPv4Network(f'{netid}/{netmask}', strict=False)
     ip_min = network.network_address + 1
     ip_max = network.broadcast_address - 1
     return str(ip_min), str(ip_max)
 
-def main():
-    HOST = '127.0.0.1'
-    PORT = 8080
-    
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
-        server_socket.bind((HOST, PORT))
-        server_socket.listen()
-        
-        print("Server in ascolto su", HOST, "porta", PORT)
-        
-        while True:
-            client_socket, client_address = server_socket.accept()
-            print("Connessione accettata da", client_address)
-            
-            data = client_socket.recv(1024).decode()
-            data_json = json.loads(data)
-            
-            netid = data_json.get("netid")
-            netmaskCIDR = data_json.get("netmaskCIDR")
-            
-            if not netid or not netmaskCIDR:
-                response_data = {"status": "ERROR"}
-            else:
-                ip_min, ip_max = get_min_max_ips(netid, netmaskCIDR)
-                response_data = {
-                    "status": "OK",
-                    "IPmin": ip_min,
-                    "IPmax": ip_max
-                }
-            
-            response_json = json.dumps(response_data)
-            client_socket.sendall(response_json.encode())
-            
-            print("Connessione chiusa con", client_address)
-            client_socket.close()
 
-if __name__ == "__main__":
-    main()
+HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
+PORT = 8080        # Port to listen on (non-privileged ports are > 1023)
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.bind((HOST, PORT))
+    s.listen()
+    conn, addr = s.accept()
+   
+    data = conn.recv(1024).decode('utf-8')
+    data = json.loads(data)
+    if( not data):
+        print("Errore: Dati errati inviati al server")
+
+    netid,netmask = data.split('/')
+    if(not netid or not netmask):
+        risp= {"status":"ERROR"}
+    elif(controllo_ip(f'{netid}/{netmask}')==True):
+        ip_min,ip_max = MinMaxIp(netid,netmask)
+        risp = {"status":"OK","IPmin":ip_min,"IPmax":ip_max}
+    else:
+        risp = {"status":"ERROR2"}
+    risp = json.dumps(risp)
+    conn.sendall(risp.encode('utf-8'))
+    # socket must be closed by client! sleep for 1 second to wait for the client
+    time.sleep(1)
+    # otherwise socket goes to TIME_WAIT!
+
