@@ -17,13 +17,14 @@ def decadimento_audioattivo(seed,niterations):
         occorrenze=0
         #inizializzo la variabile che contiene il carattere da controllare
         carattere=stringa[0]
+
         for j in range(len(stringa)):
             #se il carattere è uguale al precedente, incremento il contatore delle occorrenze
             if(stringa[j]==carattere):
                 occorrenze+=1
             #se il carattere è diverso dal precedente, scrivo il numero di occorrenze e il carattere
             else:
-                stringa_output+=str(occorrenze)+carattere+'\r\n'
+                stringa_output+=str(occorrenze)+carattere
                 #aggiorno il carattere
                 carattere=stringa[j]
                 #aggiorno il contatore delle occorrenze
@@ -32,6 +33,8 @@ def decadimento_audioattivo(seed,niterations):
         stringa_output+=str(occorrenze)+carattere
         #aggiorno la stringa di partenza
         stringa=stringa_output
+        #stampo la stringa di output mentre si aggiorna
+        print(stringa_output)
     #stampo la stringa finale
     print(stringa_output)
     return stringa_output
@@ -57,9 +60,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 data=data.decode('utf-8').split(',')
                 seed=int(data[0])
                 niterations=int(data[1])
+                print("seed: %d, niterations: %d"%(seed,niterations))
                 decadimento_audioattivo(seed,niterations)
 
             conn.close()
             os._exit(0)  # Child process ends here
-        else:  # This is the parent process
-            conn.close()
+        else: #legato all'if del pid==0
+             conn.close()
