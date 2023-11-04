@@ -9,15 +9,19 @@ HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 PORT = 5000        # Port to listen on (non-privileged ports are > 1023)
 
 #algoritmo rot11 senza le lettere kwxy
+#def rot11(x):
+#    alphabet = 'abcdefghijlmnopqrstuvz'  # Alfabeto di 22 caratteri
+#    result = []
+#    for c in x:
+#        if c in alphabet:
+#            result.append(alphabet[(alphabet.index(c) + 11) % 22])
+#        else:
+#            result.append(c)
+#    return "".join(result)
 def rot11(x):
-    alphabet = 'abcefghijlmnopqrstuvz'  # Alfabeto di 22 caratteri
-    result = []
-    for c in x:
-        if c in alphabet:
-            result.append(alphabet[(alphabet.index(c) + 11) % 22])
-        else:
-            result.append(c)
-    return "".join(result)
+    x=x.lower()
+    alpha='abcdefghijlmnopqrstuvz'
+    return "".join([alpha[(alpha.index(c)+11)%22] if c in alpha else c for c in x])
 
 
 
